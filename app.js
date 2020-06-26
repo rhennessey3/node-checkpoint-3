@@ -1,44 +1,27 @@
 const express = require('express')
 const morgan = require('morgan')
-// Create a route handler function on the path /sum that accepts
-// two query parameters named a and b and find the sum of the
-// two values. Return a string in the format "The sum of a and b is c".
-// Note that query parameters are always strings so some thought
-// should be given to converting them to numbers.
+const express = require('express');
+const morgan = require('morgan');
 
-const app = express()
+const app = express();
+app.use(morgan('common'));
 
+// Drill 1
 app.get('/sum', (req, res) => {
+    const { a, b } = req.query;
 
-    // make sure they are the same numbers
+    // Validation - a and b are required and should be numbers
     if (!a) {
         return res
             .status(400)
-            .send('a us reqired')
+            .send('a is required');
     }
 
     if (!b) {
         return res
             .status(400)
-            .send('b us reqired')
+            .send('b is required');
     }
-
-    //  make sure they are a string
-    const numA = parseFloat(a);
-    const numB = parseFloat(b);
-
-    if (Number.isNaN(numA)) {
-        return res
-            .status(400)
-            .send('this should be a number')
-    }
-
-    if (Number.isNaN(numB)) {
-        return res
-            .status(400)
-            .send('this should be a number')
-    }
-
 
     const numA = parseFloat(a);
     const numB = parseFloat(b);
@@ -65,50 +48,74 @@ app.get('/sum', (req, res) => {
     res
         .status(200)
         .send(responseString);
+});
 
-})
+// Drill 2
+app.get('/cipher', (req, res) => {
+    const { text, shift } = req.query;
 
-// all valid, perform the task
-// Make the text uppercase for convenience
-// the question did not say what to do with punctuation marks
-// and numbers so we will ignore them and only convert letters.
-// Also just the 26 letters of the alphabet in typical use in the US
-// and UK today. To support an international audience we will have to
-// do more
-// Create a loop over the characters, for each letter, covert
-// using the shift
+    // validation: both values are required, shift must be a number
+    if (!text) {
+        return res
+            .status(400)
+            .send('text is required');
+    }
 
-const base = 'A'.charCodeAt(0);  // get char code 
+    if (!shift) {
+        return res
+            .status(400)
+            .send('shift is required');
+    }
 
-const cipher = text
-    .toUpperCase()
-    .split('') // create an array of characters
-    .map(char => { // map each original char to a converted char
-        const code = char.charCodeAt(0); //get the char code
+    const numShift = parseFloat(shift);
 
-        // if it is not one of the 26 letters ignore it
-        if (code < base || code > (base + 26)) {
-            return char;
-        }
+    if (Number.isNaN(numShift)) {
+        return res
+            .status(400)
+            .send('shift must be a number');
+    }
 
-        // otherwise convert it
-        // get the distance from A
-        let diff = code - base;
-        diff = diff + numShift;
+    // all valid, perform the task
+    // Make the text uppercase for convenience
+    // the question did not say what to do with punctuation marks
+    // and numbers so we will ignore them and only convert letters.
+    // Also just the 26 letters of the alphabet in typical use in the US
+    // and UK today. To support an international audience we will have to
+    // do more
+    // Create a loop over the characters, for each letter, covert
+    // using the shift
 
-        // in case shift takes the value past Z, cycle back to the beginning
-        diff = diff % 26;
+    const base = 'A'.charCodeAt(0);  // get char code 
 
-        // convert back to a character
-        const shiftedChar = String.fromCharCode(base + diff);
-        return shiftedChar;
-    })
-    .join(''); // construct a String from the array
+    const cipher = text
+        .toUpperCase()
+        .split('') // create an array of characters
+        .map(char => { // map each original char to a converted char
+            const code = char.charCodeAt(0); //get the char code
 
-// Return the response
-res
-    .status(200)
-    .send(cipher);  
+            // if it is not one of the 26 letters ignore it
+            if (code < base || code > (base + 26)) {
+                return char;
+            }
+
+            // otherwise convert it
+            // get the distance from A
+            let diff = code - base;
+            diff = diff + numShift;
+
+            // in case shift takes the value past Z, cycle back to the beginning
+            diff = diff % 26;
+
+            // convert back to a character
+            const shiftedChar = String.fromCharCode(base + diff);
+            return shiftedChar;
+        })
+        .join(''); // construct a String from the array
+
+    // Return the response
+    res
+        .status(200)
+        .send(cipher);
 });
 
 // Drill 3
@@ -192,4 +199,3 @@ app.get('/lotto', (req, res) => {
 app.listen(8000, () => {
     console.log('Server started on PORT 8000');
 });
-
